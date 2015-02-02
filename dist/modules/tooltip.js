@@ -58,8 +58,9 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
         // store $id to identify the triggering element in events
         // give priority to options.id, otherwise, try to use
         // element id if defined
+        if (element[0].nodeName) {
         $tooltip.$id = options.id || element.attr('id') || '';
-
+        }
         // Support scope as string options
         if(options.title) {
           scope.title = $sce.trustAsHtml(options.title);
