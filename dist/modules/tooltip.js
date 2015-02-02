@@ -1,6 +1,6 @@
 /**
  * angular-strap
- * @version v2.1.6 - 2015-01-11
+ * @version v2.1.6 - 2015-02-02
  * @link http://mgcrea.github.io/angular-strap
  * @author Olivier Louvignes (olivier@mg-crea.com)
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -44,7 +44,9 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
         var $tooltip = {};
 
         // Common vars
+        if (element[0].nodeName) {
         var nodeName = element[0].nodeName.toLowerCase();
+        }
         var options = $tooltip.$options = angular.extend({}, defaults, config);
         $tooltip.$promise = fetchTemplate(options.template);
         var scope = $tooltip.$scope = options.scope && options.scope.$new() || $rootScope.$new();
@@ -409,10 +411,14 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
           var triggers = options.trigger.split(' ');
           angular.forEach(triggers, function(trigger) {
             if(trigger === 'click') {
+              if (element[0].nodeName) {
               element.on('click', $tooltip.toggle);
+              }
             } else if(trigger !== 'manual') {
+              if (element[0].nodeName) {
               element.on(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
               element.on(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              }
               nodeName === 'button' && trigger !== 'hover' && element.on(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
             }
           });
@@ -483,9 +489,19 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
           var el = $element[0];
 
           var elRect = el.getBoundingClientRect();
+          var rect = {};
+          
+          // IE8 has issues with angular.extend and using elRect directly.
+          // By coping the values of elRect into a new object, we can continue to use extend
+          for (var p in elRect) {
+            if (elRect.hasOwnProperty(p)) {
+              rect[p] = elRect[p];  
+            }
+          }
+          
           if (elRect.width === null) {
             // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
-            elRect = angular.extend({}, elRect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top });
+            rect = angular.extend({}, rect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top });
           }
 
           var elPos;
@@ -495,7 +511,7 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
             elPos = dimensions.position(el);
           }
 
-          return angular.extend({}, elRect, elPos);
+          return angular.extend({}, rect, elPos);
         }
 
         function getCalculatedOffset(placement, position, actualWidth, actualHeight) {
@@ -626,9 +642,14 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
 
         // Directive options
         var options = {scope: scope};
-        angular.forEach(['template', 'contentTemplate', 'placement', 'container', 'target', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'backdropAnimation', 'type', 'customClass', 'id'], function(key) {
+        angular.forEach(['template', 'contentTemplate', 'placement', 'container', 'delay', 'trigger', 'keyboard', 'html', 'animation', 'backdropAnimation', 'type', 'customClass', 'id'], function(key) {
           if(angular.isDefined(attr[key])) options[key] = attr[key];
         });
+
+        // should not parse target attribute, only data-target
+        if(element.attr('data-target')) {
+          options.target = element.attr('data-target');
+        }
 
         // overwrite inherited title value when no value specified
         // fix for angular 1.3.1 531a8de72c439d8ddd064874bf364c00cedabb11

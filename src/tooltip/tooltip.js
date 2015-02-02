@@ -37,7 +37,9 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
         var $tooltip = {};
 
         // Common vars
+        if (element[0].nodeName) {
         var nodeName = element[0].nodeName.toLowerCase();
+        }
         var options = $tooltip.$options = angular.extend({}, defaults, config);
         $tooltip.$promise = fetchTemplate(options.template);
         var scope = $tooltip.$scope = options.scope && options.scope.$new() || $rootScope.$new();
@@ -402,10 +404,14 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions'])
           var triggers = options.trigger.split(' ');
           angular.forEach(triggers, function(trigger) {
             if(trigger === 'click') {
+              if (element[0].nodeName) {
               element.on('click', $tooltip.toggle);
+              }
             } else if(trigger !== 'manual') {
+              if (element[0].nodeName) {
               element.on(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
               element.on(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              }
               nodeName === 'button' && trigger !== 'hover' && element.on(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
             }
           });

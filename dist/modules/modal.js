@@ -1,6 +1,6 @@
 /**
  * angular-strap
- * @version v2.1.6 - 2015-01-11
+ * @version v2.1.6 - 2015-02-02
  * @link http://mgcrea.github.io/angular-strap
  * @author Olivier Louvignes (olivier@mg-crea.com)
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -310,9 +310,17 @@ angular.module('mgcrea.ngStrap.modal', ['mgcrea.ngStrap.helpers.dimensions'])
 
         // Directive options
         var options = {scope: scope, element: element, show: false};
-        angular.forEach(['template', 'contentTemplate', 'placement', 'backdrop', 'keyboard', 'html', 'container', 'animation', 'id'], function(key) {
+        angular.forEach(['template', 'contentTemplate', 'placement', 'container', 'animation', 'id'], function(key) {
           if(angular.isDefined(attr[key])) options[key] = attr[key];
         });
+
+        // use string regex match for boolean values
+        var falseValueRegExp = /^(false|0|)$/;
+        angular.forEach(['keyboard', 'html'], function(key) {
+          if(angular.isDefined(attr[key])) options[key] = !falseValueRegExp.test(attr[key]);
+        });
+
+        if(angular.isDefined(attr['backdrop'])) options['backdrop'] = falseValueRegExp.test(attr['backdrop']) ? false : attr['backdrop'];
 
         // Support scope as data-attrs
         angular.forEach(['title', 'content'], function(key) {
